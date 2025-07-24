@@ -1,1 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URL Shortener Microservice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 300;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+        }
+        
+        .api-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 40px;
+            border-left: 5px solid #667eea;
+        }
+        
+        .api-endpoint {
+            background: #333;
+            color: #00ff88;
+            padding: 15px 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+            border: 1px solid #555;
+        }
+        
+        .main-form {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        input[type="url"] {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #fafafa;
+        }
+        
+        input[type="url"]:focus {
+            outline: none;
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+        
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .result {
+            background: #1e1e1e;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            overflow-x: auto;
+            border: 1px solid #333;
+            min-height: 80px;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .short-url-display {
+            background: #e8f5e8;
+            border: 2px solid #28a745;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+        }
+        
+        .short-url-link {
+            display: inline-block;
+            color: #0066cc;
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2rem;
+            font-weight: bold;
+            padding: 10px 20px;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #0066cc;
+            transition: all 0.3s ease;
+        }
+        
+        .short-url-link:hover {
+            background: #0066cc;
+            color: white;
+            transform: translateY(-1px);
+        }
+        
+        .error-display {
+            background: #f8d7da;
+            border: 2px solid #dc3545;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            text-align: center;
+            color: #721c24;
+        }
+        
+        .test-section {
+            background: #e8f4fd;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .test-buttons {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-test {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .btn-test:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+        }
+        
+        .examples {
+            background: #fff3cd;
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        
+        .example-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .example-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .example-title {
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        
+        .example-code {
+            font-family: 'Courier New', monospace;
+            color: #666;
+            font-size: 0.9rem;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        
+        .loading {
+            color: #667eea;
+            font-style: italic;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .url-list {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .url-item {
+            padding: 15px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .url-item:last-child {
+            margin-bottom: 0;
+        }
+        
+        .original-url {
+            color: #666;
+            word-break: break-all;
+            flex: 1;
+        }
+        
+        .short-link {
+            color: #0066cc;
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            padding: 5px 10px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border: 1px solid #0066cc;
+        }
+        
+        .short-link:hover {
+            background: #0066cc;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔗 URL Shortener</h1>
+        <p class="subtitle">Create short URLs and redirect to original destinations</p>
+        
+        <div class="api-section">
+            <h3>API Endpoints</h3>
+            <div class="api-endpoint">POST /api/shorturl</div>
+            <div class="api-endpoint">GET /api/shorturl/:short_url</div>
+            <p><strong>Create short URLs</strong> and <strong>redirect</strong> to original destinations</p>
+        </div>
+        
+        <div class="main-form">
+            <h3>🎯 Create Short URL</h3>
+            <form id="shortenForm">
+                <div class="form-group">
+                    <label for="urlInput">Enter URL to shorten:</label>
+                    <input 
+                        type="url" 
+                        id="urlInput" 
+                        placeholder="https://www.example.com" 
+                        required
+                    >
+                </div>
+                <button type="submit" class="btn-primary" id="submitBtn">
+                    🚀 Shorten URL
+                </button>
+            </form>
+            
+            <div id="urlResult" style="display: none;"></div>
+        </div>
+        
+        <div class="result-section">
+            <h3>📊 API Response</h3>
+            <div id="apiResult" class="result">Submit a URL above to see the API response...</div>
+        </div>
+        
+        <div class="test-section">
+            <h3>🧪 Quick Tests</h3>
+            <div class="test-buttons">
+                <button class="btn-test" onclick="testValidUrl()">✅ Test Valid URL</button>
+                <button class="btn-test" onclick="testInvalidUrl()">❌ Test Invalid URL</button>
+                <button class="btn-test" onclick="clearResults()">🗑️ Clear Results</button>
+            </div>
+        </div>
+        
+        <div class="url-list" id="urlList" style="display: none;">
+            <h3>📋 Your Shortened URLs</h3>
+            <div id="urlItems"></div>
+        </div>
+        
+        <div class="examples">
+            <h3>📋 API Examples</h3>
+            <div class="example-item">
+                <div class="example-title">1. POST /api/shorturl (Create short URL)</div>
+                <div class="example-code">POST: {"url": "https://www.freecodecamp.org"}
+Response: {"original_url": "https://www.freecodecamp.org", "short_url": 1}</div>
+            </div>
+            <div class="example-item">
+                <div class="example-title">2. GET /api/shorturl/1 (Redirect)</div>
+                <div class="example-code">GET /api/shorturl/1 → Redirects to https://www.freecodecamp.org</div>
+            </div>
+            <div class="example-item">
+                <div class="example-title">3. Invalid URL</div>
+                <div class="example-code">POST: {"url": "invalid-url"}
+Response: {"error": "invalid url"}</div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>Built with Express.js | URL validation with DNS lookup</p>
+        </div>
+    </div>
 
+    <script>
+        // Store created URLs for display
+        let createdUrls = [];
+        
+        // Handle form submission
+        document.getElementById('shortenForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const urlInput = document.getElementById('urlInput');
+            const submitBtn = document.getElementById('submitBtn');
+            const apiResult = document.getElementById('apiResult');
+            const urlResult = document.getElementById('urlResult');
+            
+            const url = urlInput.value.trim();
+            
+            if (!url) {
+                showError('Please enter a URL');
+                return;
+            }
+            
+            // Disable button and show loading
+            submitBtn.disabled = true;
+            submitBtn.textContent = '⏳ Shortening...';
+            apiResult.innerHTML = '<span class="loading">Creating short URL...</span>';
+            urlResult.style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/shorturl', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ url: url })
+                });
+                
+                const data = await response.json();
+                
+                // Display API response
+                apiResult.textContent = JSON.stringify(data, null, 2);
+                
+                if (data.error) {
+                    showError(data.error);
+                } else {
+                    showSuccess(data);
+                    addToUrlList(data);
+                    urlInput.value = '';
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                apiResult.textContent = 'Error: Unable to connect to server';
+                showError('Unable to connect to server');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = '🚀 Shorten URL';
+            }
+        });
+        
+        // Show success result
+        function showSuccess(data) {
+            const urlResult = document.getElementById('urlResult');
+            const baseUrl = window.location.origin;
+            const shortUrl = `${baseUrl}/api/shorturl/${data.short_url}`;
+            
+            urlResult.innerHTML = `
+                <div class="short-url-display">
+                    <h4>✅ URL Shortened Successfully!</h4>
+                    <p><strong>Original:</strong> ${data.original_url}</p>
+                    <p><strong>Short URL:</strong></p>
+                    <a href="${shortUrl}" target="_blank" class="short-url-link">${shortUrl}</a>
+                    <p style="margin-top: 10px; font-size: 0.9rem; color: #666;">
+                        Click the link above to test the redirect
+                    </p>
+                </div>
+            `;
+            urlResult.style.display = 'block';
+        }
+        
+        // Show error result
+        function showError(errorMessage) {
+            const urlResult = document.getElementById('urlResult');
+            urlResult.innerHTML = `
+                <div class="error-display">
+                    <h4>❌ Error</h4>
+                    <p>${errorMessage}</p>
+                </div>
+            `;
+            urlResult.style.display = 'block';
+        }
+        
+        // Add to URL list
+        function addToUrlList(data) {
+            createdUrls.unshift(data);
+            updateUrlList();
+        }
+        
+        // Update URL list display
+        function updateUrlList() {
+            const urlList = document.getElementById('urlList');
+            const urlItems = document.getElementById('urlItems');
+            
+            if (createdUrls.length === 0) {
+                urlList.style.display = 'none';
+                return;
+            }
+            
+            urlList.style.display = 'block';
+            
+            urlItems.innerHTML = createdUrls.map(url => {
+                const shortUrl = `${window.location.origin}/api/shorturl/${url.short_url}`;
+                return `
+                    <div class="url-item">
+                        <span class="original-url">${url.original_url}</span>
+                        <a href="${shortUrl}" target="_blank" class="short-link">
+                            /api/shorturl/${url.short_url}
+                        </a>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Test functions
+        async function testValidUrl() {
+            document.getElementById('urlInput').value = 'https://www.freecodecamp.org';
+            document.getElementById('shortenForm').dispatchEvent(new Event('submit'));
+        }
+        
+        async function testInvalidUrl() {
+            document.getElementById('urlInput').value = 'invalid-url';
+            document.getElementById('shortenForm').dispatchEvent(new Event('submit'));
+        }
+        
+        function clearResults() {
+            document.getElementById('urlInput').value = '';
+            document.getElementById('apiResult').textContent = 'Submit a URL above to see the API response...';
+            document.getElementById('urlResult').style.display = 'none';
+            createdUrls = [];
+            updateUrlList();
+        }
+        
+        // Auto-focus on input when page loads
+        window.addEventListener('load', function() {
+            document.getElementById('urlInput').focus();
+        });
+    </script>
+</body>
+</html>
